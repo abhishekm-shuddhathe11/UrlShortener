@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import jakarta.validation.Valid;
 import com.example.urlshortener.dto.UrlRequest;
 import com.example.urlshortener.dto.UrlResponse;
 import com.example.urlshortener.service.UrlService;
@@ -22,7 +23,8 @@ public class UrlController {
     }
 
     @PostMapping("/shorten")
-    public UrlResponse shorten(@RequestBody UrlRequest request) {
+    public UrlResponse shorten(@Valid @RequestBody UrlRequest request)
+    {
         String longUrl = request.getUrl();
         String customShortKey = request.getShortKey();
         String shortKey = service.shortenUrl(longUrl, customShortKey);
