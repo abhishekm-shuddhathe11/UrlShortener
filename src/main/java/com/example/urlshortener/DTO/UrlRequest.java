@@ -7,8 +7,8 @@ public class UrlRequest {
 
     @NotBlank(message = "URL must not be blank")
     @Pattern(
-        regexp = "^(https?://)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([/\\w \\.-]*)*/?$",
-        message = "Invalid URL format"
+    regexp = "^(http://|https://).+$",
+    message = "URL must start with http:// or https://"
     )
     private String url;
 
