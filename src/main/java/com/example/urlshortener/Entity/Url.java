@@ -19,7 +19,7 @@ public class Url {
     @Column(unique = true)
     private String shortKey;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 2048)
     private String longUrl;
 
     @CreatedDate
