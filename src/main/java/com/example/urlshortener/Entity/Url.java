@@ -16,7 +16,9 @@ public class Url {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false, length = 10)
+    // @Column(unique = true, nullable = false, length = 10)
+    // private String shortKey;
+    @Size(min = 3, max = 10, message = "Short key must be between 3 and 10 characters")
     private String shortKey;
 
     @Column(nullable = false, length = 2048)
