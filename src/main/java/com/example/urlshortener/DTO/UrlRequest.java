@@ -1,5 +1,6 @@
 package com.example.urlshortener.dto;
 
+import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
@@ -12,8 +13,9 @@ public class UrlRequest {
     )
     private String url;
 
-    private String shortKey; // Optional custom short key
-
+    @Size(min = 3, max = 10, message = "Short key must be between 3 and 10 characters")
+    private String shortKey;
+    
     public UrlRequest() {
     }
 

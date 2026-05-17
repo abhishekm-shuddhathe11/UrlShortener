@@ -16,4 +16,12 @@ public class UrlResponse {
     public String getShortUrl() { return shortUrl; }
     
     public String getLongUrl() { return longUrl; }
+
+    public void setShortUrl(String shortUrl) {
+    this.shortUrl = shortUrl;
+    }
+
+    public void setLongUrl(String longUrl) {
+        this.longUrl = longUrl;
+    }
 }

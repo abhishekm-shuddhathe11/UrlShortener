@@ -1,62 +1,77 @@
 package com.example.urlshortener.entity;
 
-import jakarta.persistence.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "urls")
-@EntityListeners(AuditingEntityListener.class)
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity                         // Marks this class as a database entity
+@Table(name = "urls")          // Table name in PostgreSQL
 public class Url {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    // Primary key with auto-increment
     private Long id;
 
-    // @Column(unique = true, nullable = false, length = 10)
-    // private String shortKey;
-    @Size(min = 3, max = 10, message = "Short key must be between 3 and 10 characters")
+    @Column(unique = true)
     private String shortKey;
 
-    @Column(nullable = false, length = 2048)
+    @Column(nullable = false)
+    // Original long URL
     private String longUrl;
 
-    @CreatedDate
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @LastModifiedDate
     @Column(nullable = false)
-    private LocalDateTime updatedAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
+    // Total number of times short URL was accessed
+    @Column(nullable = false)
+    private Long totalClicks = 0L;
+
+    // Constructor
+    // public Url() {
+    //     this.createdAt = LocalDateTime.now();
+    // }
+
+    // Getter for id
     public Long getId() {
         return id;
     }
 
+    // Getter for shortKey
     public String getShortKey() {
         return shortKey;
     }
 
+    // Setter for shortKey
     public void setShortKey(String shortKey) {
         this.shortKey = shortKey;
     }
 
+    // Getter for longUrl
     public String getLongUrl() {
         return longUrl;
     }
 
+    // Setter for longUrl
     public void setLongUrl(String longUrl) {
         this.longUrl = longUrl;
     }
 
+    // Getter for createdAt
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
+    public Long getTotalClicks() {
+        return totalClicks;
+    }
+
+    public void setTotalClicks(Long totalClicks) {
+        this.totalClicks = totalClicks;
     }
 }
