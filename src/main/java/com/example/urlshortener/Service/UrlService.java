@@ -1,5 +1,7 @@
 package com.example.urlshortener.service;
 
+import com.example.urlshortener.exception.UrlExpiredException;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +22,7 @@ public class UrlService {
     }
 
    @Transactional
-public String shortenUrl(String longUrl, String customShortKey) {
+    public String shortenUrl(String longUrl,String customShortKey,LocalDateTime expiresAt) {
 
     validateLongUrl(longUrl);
 
@@ -42,6 +44,7 @@ public String shortenUrl(String longUrl, String customShortKey) {
         Url url = new Url();
         url.setLongUrl(longUrl);
         url.setShortKey(customShortKey);
+        url.setExpiresAt(expiresAt);
 
         urlRepository.save(url);
 
@@ -51,6 +54,7 @@ public String shortenUrl(String longUrl, String customShortKey) {
     // Auto-generated short key flow
     Url url = new Url();
     url.setLongUrl(longUrl);
+    url.setExpiresAt(expiresAt);
 
     Url saved = urlRepository.save(url);
 
@@ -65,20 +69,30 @@ public String shortenUrl(String longUrl, String customShortKey) {
 
     public String getOriginalUrl(String shortKey) {
 
-        if (!StringUtils.hasText(shortKey)) {
-            throw new IllegalArgumentException("Short key must not be blank");
-        }
+    if (!StringUtils.hasText(shortKey)) {
+        throw new IllegalArgumentException("Short key must not be blank");
+    }
 
-        Url url = urlRepository.findByShortKey(shortKey)
-                .orElseThrow(() -> new UrlNotFoundException(shortKey));
+    Url url = urlRepository.findByShortKey(shortKey)
+            .orElseThrow(() -> new UrlNotFoundException(shortKey));
 
-        Long clicks = url.getTotalClicks();
-        if (clicks == null) clicks = 0L;
+    // Check expiry
+    if (url.getExpiresAt() != null &&
+            url.getExpiresAt().isBefore(LocalDateTime.now())) {
 
-        url.setTotalClicks(clicks + 1);
-        urlRepository.save(url);
+        throw new UrlExpiredException();
+    }
 
-        return url.getLongUrl();
+    Long clicks = url.getTotalClicks();
+
+    if (clicks == null)
+        clicks = 0L;
+
+    url.setTotalClicks(clicks + 1);
+
+    urlRepository.save(url);
+
+    return url.getLongUrl();
     }
 
     private static void validateLongUrl(String longUrl) {

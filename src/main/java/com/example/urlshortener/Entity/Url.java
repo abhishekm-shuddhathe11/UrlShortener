@@ -32,6 +32,9 @@ public class Url {
     @Column(nullable = false)
     private Long totalClicks = 0L;
 
+    @Column
+    private LocalDateTime expiresAt;
+
     // Constructor
     // public Url() {
     //     this.createdAt = LocalDateTime.now();
@@ -73,5 +76,13 @@ public class Url {
 
     public void setTotalClicks(Long totalClicks) {
         this.totalClicks = totalClicks;
+    }
+
+    public LocalDateTime getExpiresAt() {
+        return expiresAt;
+    }
+
+    public void setExpiresAt(LocalDateTime expiresAt) {
+        this.expiresAt = expiresAt;
     }
 }

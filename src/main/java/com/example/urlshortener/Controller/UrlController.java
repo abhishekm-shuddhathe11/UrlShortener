@@ -1,5 +1,7 @@
 package com.example.urlshortener.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,8 +15,12 @@ import com.example.urlshortener.dto.UrlRequest;
 import com.example.urlshortener.dto.UrlResponse;
 import com.example.urlshortener.service.UrlService;
 
-@RestController
-public class UrlController {
+    @Tag(
+        name = "URL Shortener APIs",
+        description = "APIs for shortening and redirecting URLs"
+    )
+    @RestController
+    public class UrlController {
 
     private final UrlService service;
 
@@ -22,12 +28,13 @@ public class UrlController {
         this.service = service;
     }
 
+    @Operation(summary = "Create short URL")
     @PostMapping("/shorten")
     public UrlResponse shorten(@Valid @RequestBody UrlRequest request)
     {
         String longUrl = request.getUrl();
         String customShortKey = request.getShortKey();
-        String shortKey = service.shortenUrl(longUrl, customShortKey);
+        String shortKey = service.shortenUrl(longUrl, customShortKey,request.getExpiresAt());   
 
         String shortUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/{shortKey}")
@@ -37,6 +44,7 @@ public class UrlController {
         return new UrlResponse(shortUrl, longUrl);
     }
 
+    @Operation(summary = "Redirect to original URL")
     @GetMapping("/{shortKey}")
     public ResponseEntity<Void> redirect(@PathVariable String shortKey) {
 
@@ -48,6 +56,7 @@ public class UrlController {
                 .build();
     }
 
+    @Operation(summary = "Get URL information")
     @GetMapping("/info/{shortKey}")
     public UrlResponse info(@PathVariable String shortKey) {
         String longUrl = service.getOriginalUrl(shortKey);
