@@ -18,11 +18,10 @@ public class Url {
     // Primary key with auto-increment
     private Long id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String shortKey;
 
-    @Column(nullable = false)
-    // Original long URL
+    @Column(nullable = false, length = 2048)
     private String longUrl;
 
     @Column(nullable = false)
