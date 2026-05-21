@@ -7,10 +7,18 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 
-@Entity                         // Marks this class as a database entity
-@Table(name = "urls")          // Table name in PostgreSQL
+// Creates database index on shortKey column
+// Improves short URL lookup performance
+@Entity
+@Table(
+    name = "urls",
+    indexes = {
+        @Index(name = "idx_short_key", columnList = "shortKey")
+    }
+)         
 public class Url {
 
     @Id
