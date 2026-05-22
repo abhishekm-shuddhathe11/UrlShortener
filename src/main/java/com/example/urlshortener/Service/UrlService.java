@@ -3,6 +3,7 @@ package com.example.urlshortener.service;
 import com.example.urlshortener.exception.UrlExpiredException;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -55,6 +56,10 @@ public class UrlService {
     Url url = new Url();
     url.setLongUrl(longUrl);
     url.setExpiresAt(expiresAt);
+
+    // Persist once to obtain the generated ID while satisfying NOT NULL on shortKey.
+    String tempShortKey = "tmp" + UUID.randomUUID().toString().replace("-", "");
+    url.setShortKey(tempShortKey);
 
     Url saved = urlRepository.save(url);
 

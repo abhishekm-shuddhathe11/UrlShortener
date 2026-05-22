@@ -32,7 +32,7 @@ public class Url {
     @Column(nullable = false, length = 2048)
     private String longUrl;
 
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
     // Total number of times short URL was accessed
