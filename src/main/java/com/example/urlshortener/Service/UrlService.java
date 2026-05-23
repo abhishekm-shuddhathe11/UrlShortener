@@ -1,14 +1,15 @@
 package com.example.urlshortener.service;
 
-import com.example.urlshortener.exception.UrlExpiredException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.example.urlshortener.entity.Url;
+import com.example.urlshortener.exception.UrlExpiredException;
 import com.example.urlshortener.exception.UrlNotFoundException;
 import com.example.urlshortener.repository.UrlRepository;
 import com.example.urlshortener.util.Base62;

@@ -26,7 +26,7 @@ public class Url {
     // Primary key with auto-increment
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, length = 10)
     private String shortKey;
 
     @Column(nullable = false, length = 2048)
