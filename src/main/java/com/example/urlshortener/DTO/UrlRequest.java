@@ -1,10 +1,11 @@
 package com.example.urlshortener.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
-import jakarta.validation.constraints.Size;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 public class UrlRequest {
 
@@ -21,8 +22,8 @@ public class UrlRequest {
     private String shortKey;
 
     @Schema(description = "Optional expiration date and time for the short URL")
-    private LocalDateTime expiresAt;
-    
+    private LocalDateTime expiresAt = LocalDateTime.now().plusDays(30);      // Default expiration set to 30 days
+
     public UrlRequest() {
     }
 
