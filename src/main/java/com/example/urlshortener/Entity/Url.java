@@ -29,7 +29,7 @@ public class Url {
     @Column(unique = true, nullable = false, length = 10)
     private String shortKey;
 
-    @Column(nullable = false, length = 2048)
+    @Column(name = "long_url", nullable = false, length = 2048)
     private String longUrl;
 
     @Column(nullable = false, updatable = false)

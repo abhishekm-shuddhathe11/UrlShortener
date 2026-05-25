@@ -36,57 +36,59 @@ public class UrlService {
     }
 
     // Custom short key flow
-    if (StringUtils.hasText(customShortKey)) {
+    if (StringUtils.hasText(customShortKey)) 
+    {
 
-        if (urlRepository.findByShortKey(customShortKey).isPresent()) {
+        if (urlRepository.findByShortKey(customShortKey).isPresent()) 
+        {
             throw new IllegalArgumentException(
                     "Custom short key already exists: " + customShortKey);
         }
 
+            Url url = new Url();
+            url.setLongUrl(longUrl);
+            url.setShortKey(customShortKey);
+            url.setExpiresAt(expiresAt);
+
+            urlRepository.save(url);
+
+            return customShortKey;
+        }
+
+        // Auto-generated short key flow
         Url url = new Url();
         url.setLongUrl(longUrl);
-        url.setShortKey(customShortKey);
         url.setExpiresAt(expiresAt);
 
-        urlRepository.save(url);
+        // Persist once to obtain the generated ID while satisfying NOT NULL on shortKey.
+        String tempShortKey = "tmp" + UUID.randomUUID().toString().replace("-", "");
+        url.setShortKey(tempShortKey);
 
-        return customShortKey;
+        Url saved = urlRepository.save(url);
+
+        String shortKey = Base62.encode(saved.getId());
+
+        saved.setShortKey(shortKey);
+
+        urlRepository.save(saved);
+
+        return shortKey;
     }
-
-    // Auto-generated short key flow
-    Url url = new Url();
-    url.setLongUrl(longUrl);
-    url.setExpiresAt(expiresAt);
-
-    // Persist once to obtain the generated ID while satisfying NOT NULL on shortKey.
-    String tempShortKey = "tmp" + UUID.randomUUID().toString().replace("-", "");
-    url.setShortKey(tempShortKey);
-
-    Url saved = urlRepository.save(url);
-
-    String shortKey = Base62.encode(saved.getId());
-
-    saved.setShortKey(shortKey);
-
-    urlRepository.save(saved);
-
-    return shortKey;
-}
 
     public String getOriginalUrl(String shortKey) {
 
-    if (!StringUtils.hasText(shortKey)) {
-        throw new IllegalArgumentException("Short key must not be blank");
-    }
+        if (!StringUtils.hasText(shortKey)) {
+            throw new IllegalArgumentException("Short key must not be blank");
+        }
 
-    Url url = urlRepository.findByShortKey(shortKey)
-            .orElseThrow(() -> new UrlNotFoundException(shortKey));
+        Url url = urlRepository.findByShortKey(shortKey)
+                .orElseThrow(() -> new UrlNotFoundException(shortKey));
 
-    // Check expiry
-    if (url.getExpiresAt() != null &&
-            url.getExpiresAt().isBefore(LocalDateTime.now())) {
+        // Check expiry
+        if (url.getExpiresAt() != null &&
+                url.getExpiresAt().isBefore(LocalDateTime.now())) {
 
-        throw new UrlExpiredException();
+            throw new UrlExpiredException();
     }
 
     Long clicks = url.getTotalClicks();
