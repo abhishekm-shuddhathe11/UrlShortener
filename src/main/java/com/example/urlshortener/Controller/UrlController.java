@@ -47,7 +47,9 @@ import jakarta.validation.Valid;
         return new UrlResponse(shortUrl, longUrl);
     }
 
-    @Operation(summary = "Redirect to original URL")
+    @Operation(
+    summary = "Redirect to original URL",
+    description = "Redirects users from a short URL to the stored original URL")
     @GetMapping("/{shortKey}")
     public ResponseEntity<Void> redirect(@PathVariable String shortKey) {
 
