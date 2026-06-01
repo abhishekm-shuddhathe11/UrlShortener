@@ -16,6 +16,7 @@ import com.example.urlshortener.service.UrlService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 
     @Tag(
         name = "URL Shortener APIs",
@@ -56,7 +57,7 @@ import jakarta.validation.Valid;
         String longUrl = service.getOriginalUrl(shortKey);
 
         return ResponseEntity
-                .status(302)
+                .status(HttpStatus.FOUND)
                 .location(java.net.URI.create(longUrl))
                 .build();
     }
