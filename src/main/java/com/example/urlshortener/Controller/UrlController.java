@@ -1,5 +1,6 @@
 package com.example.urlshortener.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -56,7 +57,7 @@ import jakarta.validation.Valid;
         String longUrl = service.getOriginalUrl(shortKey);
 
         return ResponseEntity
-                .status(302)
+                .status(HttpStatus.FOUND)
                 .location(java.net.URI.create(longUrl))
                 .build();
     }
