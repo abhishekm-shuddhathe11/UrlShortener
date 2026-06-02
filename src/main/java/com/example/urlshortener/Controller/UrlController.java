@@ -62,7 +62,9 @@ import org.springframework.http.HttpStatus;
                 .build();
     }
 
-    @Operation(summary = "Get URL information")
+    @Operation(
+    summary = "Get URL information",
+    description = "Returns details for a shortened URL")
     @GetMapping("/info/{shortKey}")
     public UrlResponse info(@PathVariable String shortKey) {
         String longUrl = service.getOriginalUrl(shortKey);
