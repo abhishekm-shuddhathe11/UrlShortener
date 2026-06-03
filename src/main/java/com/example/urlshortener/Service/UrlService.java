@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -16,6 +18,8 @@ import com.example.urlshortener.util.Base62;
 
 @Service
 public class UrlService {
+
+    private static final Logger log = LoggerFactory.getLogger(UrlService.class);
 
     private final UrlRepository urlRepository;
 
@@ -61,7 +65,7 @@ public class UrlService {
         url.setExpiresAt(expiresAt);
 
         // Persist once to obtain the generated ID while satisfying NOT NULL on shortKey.
-        String tempShortKey = "tmp" + UUID.randomUUID().toString().replace("-", "");
+        String tempShortKey = "t" + UUID.randomUUID().toString().replace("-", "").substring(0, 9);
         url.setShortKey(tempShortKey);
 
         Url saved = urlRepository.save(url);
@@ -77,6 +81,35 @@ public class UrlService {
 
     public String getOriginalUrl(String shortKey) {
 
+        Url url = getActiveUrl(shortKey);
+
+        Long clicks = url.getTotalClicks();
+
+        if (clicks == null) {
+            clicks = 0L;
+        }
+
+        url.setTotalClicks(clicks + 1);
+
+        // Redirect should still work even if click tracking update fails for legacy rows.
+        try {
+            urlRepository.save(url);
+        } catch (RuntimeException ex) {
+            log.warn("Failed to update click count for short key {}", shortKey, ex);
+        }
+
+        return url.getLongUrl();
+    }
+
+    public String getOriginalUrlForInfo(String shortKey) {
+
+        Url url = getActiveUrl(shortKey);
+
+        return url.getLongUrl();
+    }
+
+    private Url getActiveUrl(String shortKey) {
+
         if (!StringUtils.hasText(shortKey)) {
             throw new IllegalArgumentException("Short key must not be blank");
         }
@@ -89,18 +122,13 @@ public class UrlService {
                 url.getExpiresAt().isBefore(LocalDateTime.now())) {
 
             throw new UrlExpiredException();
-    }
+        }
 
-    Long clicks = url.getTotalClicks();
+        if (!StringUtils.hasText(url.getLongUrl())) {
+            throw new IllegalArgumentException("Stored long URL is invalid");
+        }
 
-    if (clicks == null)
-        clicks = 0L;
-
-    url.setTotalClicks(clicks + 1);
-
-    urlRepository.save(url);
-
-    return url.getLongUrl();
+        return url;
     }
 
     private static void validateLongUrl(String longUrl) {
