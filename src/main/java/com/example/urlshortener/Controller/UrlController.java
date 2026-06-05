@@ -34,9 +34,9 @@ import jakarta.validation.Valid;
     @PostMapping("/api/v1/shorten")
     public UrlResponse shorten(@Valid @RequestBody UrlRequest request)
     {
-        String longUrl = request.getUrl();
-        String customShortKey = request.getShortKey();
-        String shortKey = service.shortenUrl(longUrl, customShortKey,request.getExpiresAt());   
+        final String longUrl = request.getUrl();
+        final String customShortKey = request.getShortKey();
+        final String shortKey = service.shortenUrl(longUrl, customShortKey, request.getExpiresAt());  
 
         String shortUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/{shortKey}")
