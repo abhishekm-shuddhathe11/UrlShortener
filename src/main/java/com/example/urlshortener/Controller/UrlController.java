@@ -24,7 +24,7 @@ import jakarta.validation.Valid;
     @RestController
     public class UrlController {
 
-    private final UrlService service;
+    private readonly UrlService service;
 
     public UrlController(UrlService service) {
         this.service = service;
