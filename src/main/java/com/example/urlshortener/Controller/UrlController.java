@@ -65,13 +65,13 @@ import jakarta.validation.Valid;
     description = "Returns details for a shortened URL")
     @GetMapping("/api/v1/info/{shortKey}")
     public UrlResponse info(@PathVariable String shortKey) {
-        String longUrl = service.getOriginalUrlForInfo(shortKey);
+        com.example.urlshortener.entity.Url url = service.getUrlDetails(shortKey);
         String shortUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/{shortKey}")
                 .buildAndExpand(shortKey)
                 .toUriString();
 
-        return new UrlResponse(shortUrl, longUrl);
+        return new UrlResponse(shortUrl, url.getLongUrl(), url.getTotalClicks());
     }
     
     }

@@ -108,6 +108,14 @@ public class UrlService {
         return url.getLongUrl();
     }
 
+    /**
+     * Returns Url entity details without incrementing click count.
+     */
+    public Url getUrlDetails(String shortKey) {
+        Url url = getActiveUrl(shortKey);
+        return url;
+    }
+
     private Url getActiveUrl(String shortKey) {
 
         if (!StringUtils.hasText(shortKey)) {
