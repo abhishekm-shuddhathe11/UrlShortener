@@ -1,6 +1,5 @@
 package com.example.urlshortener.controller;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,19 +23,19 @@ import jakarta.validation.Valid;
     @RestController
     public class UrlController {
 
-    private readonly UrlService service;
+    private final UrlService service;
 
     public UrlController(UrlService service) {
         this.service = service;
     }
 
     @Operation(summary = "Create short URL")
-    @PostMapping("/api/v1/shorten")
+    @PostMapping("/shorten")
     public UrlResponse shorten(@Valid @RequestBody UrlRequest request)
     {
-        final String longUrl = request.getUrl();
-        final String customShortKey = request.getShortKey();
-        final String shortKey = service.shortenUrl(longUrl, customShortKey, request.getExpiresAt());  
+        String longUrl = request.getUrl();
+        String customShortKey = request.getShortKey();
+        String shortKey = service.shortenUrl(longUrl, customShortKey,request.getExpiresAt());   
 
         String shortUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/{shortKey}")
@@ -46,26 +45,22 @@ import jakarta.validation.Valid;
         return new UrlResponse(shortUrl, longUrl);
     }
 
-    @Operation(
-    summary = "Redirect to original URL",
-    description = "Redirects users from a short URL to the stored original URL")
+    @Operation(summary = "Redirect to original URL")
     @GetMapping("/{shortKey}")
     public ResponseEntity<Void> redirect(@PathVariable String shortKey) {
 
         String longUrl = service.getOriginalUrl(shortKey);
 
         return ResponseEntity
-                .status(HttpStatus.FOUND)
+                .status(302)
                 .location(java.net.URI.create(longUrl))
                 .build();
     }
 
-    @Operation(
-    summary = "Get URL information",
-    description = "Returns details for a shortened URL")
-    @GetMapping("/api/v1/info/{shortKey}")
+    @Operation(summary = "Get URL information")
+    @GetMapping("/info/{shortKey}")
     public UrlResponse info(@PathVariable String shortKey) {
-        String longUrl = service.getOriginalUrlForInfo(shortKey);
+        String longUrl = service.getOriginalUrl(shortKey);
         String shortUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/{shortKey}")
                 .buildAndExpand(shortKey)

@@ -36,7 +36,7 @@ public class Url {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     // Total number of times short URL was accessed
-    @Column(name = "total_clicks", nullable = false)
+    @Column(nullable = false)
     private Long totalClicks = 0L;
 
     @Column
