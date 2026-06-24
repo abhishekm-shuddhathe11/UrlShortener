@@ -6,8 +6,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -23,8 +21,6 @@ import com.example.urlshortener.util.Base62;
 
 @Service
 public class UrlService {
-
-    private static final Logger log = LoggerFactory.getLogger(UrlService.class);
 
     private final UrlRepository urlRepository;
     private final UrlVisitRepository urlVisitRepository;
@@ -97,13 +93,9 @@ public class UrlService {
         }
         url.setTotalClicks(clicks + 1);
 
-        try {
-            urlRepository.save(url);
-            UrlVisit visit = new UrlVisit(url, ipAddress, userAgent, referrer);
-            urlVisitRepository.save(visit);
-        } catch (RuntimeException ex) {
-            log.warn("Failed to update click count for short key {}", shortKey, ex);
-        }
+        urlRepository.save(url);
+        UrlVisit visit = new UrlVisit(url, ipAddress, userAgent, referrer);
+        urlVisitRepository.save(visit);
 
         return url.getLongUrl();
     }
@@ -128,9 +120,24 @@ public class UrlService {
                 .map(v -> new AnalyticsResponse.VisitEntry(
                         v.getVisitedAt(), v.getIpAddress(), v.getUserAgent(), v.getReferrer()))
                 .collect(Collectors.toList());
+        long uniqueVisitorCount = visits.stream()
+                .map(UrlVisit::getIpAddress)
+                .filter(StringUtils::hasText)
+                .distinct()
+                .count();
+        LocalDateTime lastVisitedAt = visits.isEmpty() ? null : visits.get(0).getVisitedAt();
+        Long totalClicks = url.getTotalClicks() == null ? 0L : url.getTotalClicks();
 
         String shortUrl = baseUrl + "/" + shortKey;
-        return new AnalyticsResponse(shortUrl, url.getLongUrl(), url.getTotalClicks(), entries);
+        return new AnalyticsResponse(
+                shortUrl,
+                url.getLongUrl(),
+                totalClicks,
+                url.getCreatedAt(),
+                url.getExpiresAt(),
+                uniqueVisitorCount,
+                lastVisitedAt,
+                entries);
     }
 
     private Url getActiveUrl(String shortKey) {

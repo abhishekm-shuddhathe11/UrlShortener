@@ -8,15 +8,24 @@ public class AnalyticsResponse {
     private String shortUrl;
     private String longUrl;
     private Long totalClicks;
+    private LocalDateTime createdAt;
+    private LocalDateTime expiresAt;
+    private Long uniqueVisitorCount;
+    private LocalDateTime lastVisitedAt;
     private List<VisitEntry> visits;
 
     public AnalyticsResponse() {
     }
 
-    public AnalyticsResponse(String shortUrl, String longUrl, Long totalClicks, List<VisitEntry> visits) {
+    public AnalyticsResponse(String shortUrl, String longUrl, Long totalClicks, LocalDateTime createdAt,
+            LocalDateTime expiresAt, Long uniqueVisitorCount, LocalDateTime lastVisitedAt, List<VisitEntry> visits) {
         this.shortUrl = shortUrl;
         this.longUrl = longUrl;
         this.totalClicks = totalClicks;
+        this.createdAt = createdAt;
+        this.expiresAt = expiresAt;
+        this.uniqueVisitorCount = uniqueVisitorCount;
+        this.lastVisitedAt = lastVisitedAt;
         this.visits = visits;
     }
 
@@ -28,6 +37,18 @@ public class AnalyticsResponse {
 
     public Long getTotalClicks() { return totalClicks; }
     public void setTotalClicks(Long totalClicks) { this.totalClicks = totalClicks; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getExpiresAt() { return expiresAt; }
+    public void setExpiresAt(LocalDateTime expiresAt) { this.expiresAt = expiresAt; }
+
+    public Long getUniqueVisitorCount() { return uniqueVisitorCount; }
+    public void setUniqueVisitorCount(Long uniqueVisitorCount) { this.uniqueVisitorCount = uniqueVisitorCount; }
+
+    public LocalDateTime getLastVisitedAt() { return lastVisitedAt; }
+    public void setLastVisitedAt(LocalDateTime lastVisitedAt) { this.lastVisitedAt = lastVisitedAt; }
 
     public List<VisitEntry> getVisits() { return visits; }
     public void setVisits(List<VisitEntry> visits) { this.visits = visits; }

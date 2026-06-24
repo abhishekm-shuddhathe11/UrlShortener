@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import com.example.urlshortener.util.ClientRequestUtil;
 
     @Tag(
         name = "URL Shortener APIs",
@@ -51,7 +52,7 @@ import jakarta.validation.Valid;
     @GetMapping("/{shortKey}")
     public ResponseEntity<Void> redirect(@PathVariable String shortKey, HttpServletRequest request) {
 
-        String ipAddress = extractClientIp(request);
+        String ipAddress = ClientRequestUtil.extractClientIp(request);
         String userAgent = request.getHeader("User-Agent");
         String referrer = request.getHeader("Referer");
 
@@ -85,12 +86,4 @@ import jakarta.validation.Valid;
         return service.getAnalytics(shortKey, baseUrl);
     }
 
-    private String extractClientIp(HttpServletRequest request) {
-        String forwarded = request.getHeader("X-Forwarded-For");
-        if (forwarded != null && !forwarded.isBlank()) {
-            return forwarded.split(",")[0].trim();
-        }
-        return request.getRemoteAddr();
-    }
-    
     }
