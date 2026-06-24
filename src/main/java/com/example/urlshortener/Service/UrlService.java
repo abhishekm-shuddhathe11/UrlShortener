@@ -1,26 +1,37 @@
 package com.example.urlshortener.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import com.example.urlshortener.dto.AnalyticsResponse;
 import com.example.urlshortener.entity.Url;
+import com.example.urlshortener.entity.UrlVisit;
 import com.example.urlshortener.exception.UrlExpiredException;
 import com.example.urlshortener.exception.UrlNotFoundException;
 import com.example.urlshortener.repository.UrlRepository;
+import com.example.urlshortener.repository.UrlVisitRepository;
 import com.example.urlshortener.util.Base62;
 
 @Service
 public class UrlService {
 
-    private final UrlRepository urlRepository;
+    private static final Logger log = LoggerFactory.getLogger(UrlService.class);
 
-    public UrlService(UrlRepository urlRepository) {
+    private final UrlRepository urlRepository;
+    private final UrlVisitRepository urlVisitRepository;
+
+    public UrlService(UrlRepository urlRepository, UrlVisitRepository urlVisitRepository) {
         this.urlRepository = urlRepository;
+        this.urlVisitRepository = urlVisitRepository;
     }
 
    @Transactional
@@ -75,7 +86,54 @@ public class UrlService {
         return shortKey;
     }
 
+    @Transactional
+    public String getOriginalUrl(String shortKey, String ipAddress, String userAgent, String referrer) {
+
+        Url url = getActiveUrl(shortKey);
+
+        Long clicks = url.getTotalClicks();
+        if (clicks == null) {
+            clicks = 0L;
+        }
+        url.setTotalClicks(clicks + 1);
+
+        try {
+            urlRepository.save(url);
+            UrlVisit visit = new UrlVisit(url, ipAddress, userAgent, referrer);
+            urlVisitRepository.save(visit);
+        } catch (RuntimeException ex) {
+            log.warn("Failed to update click count for short key {}", shortKey, ex);
+        }
+
+        return url.getLongUrl();
+    }
+
     public String getOriginalUrl(String shortKey) {
+        return getOriginalUrl(shortKey, null, null, null);
+    }
+
+    public String getOriginalUrlForInfo(String shortKey) {
+        Url url = getActiveUrl(shortKey);
+        return url.getLongUrl();
+    }
+
+    public Url getUrlDetails(String shortKey) {
+        return getActiveUrl(shortKey);
+    }
+
+    public AnalyticsResponse getAnalytics(String shortKey, String baseUrl) {
+        Url url = getActiveUrl(shortKey);
+        List<UrlVisit> visits = urlVisitRepository.findByUrl_ShortKeyOrderByVisitedAtDesc(shortKey);
+        List<AnalyticsResponse.VisitEntry> entries = visits.stream()
+                .map(v -> new AnalyticsResponse.VisitEntry(
+                        v.getVisitedAt(), v.getIpAddress(), v.getUserAgent(), v.getReferrer()))
+                .collect(Collectors.toList());
+
+        String shortUrl = baseUrl + "/" + shortKey;
+        return new AnalyticsResponse(shortUrl, url.getLongUrl(), url.getTotalClicks(), entries);
+    }
+
+    private Url getActiveUrl(String shortKey) {
 
         if (!StringUtils.hasText(shortKey)) {
             throw new IllegalArgumentException("Short key must not be blank");
@@ -84,23 +142,16 @@ public class UrlService {
         Url url = urlRepository.findByShortKey(shortKey)
                 .orElseThrow(() -> new UrlNotFoundException(shortKey));
 
-        // Check expiry
         if (url.getExpiresAt() != null &&
                 url.getExpiresAt().isBefore(LocalDateTime.now())) {
-
             throw new UrlExpiredException();
-    }
+        }
 
-    Long clicks = url.getTotalClicks();
+        if (!StringUtils.hasText(url.getLongUrl())) {
+            throw new IllegalArgumentException("Stored long URL is invalid");
+        }
 
-    if (clicks == null)
-        clicks = 0L;
-
-    url.setTotalClicks(clicks + 1);
-
-    urlRepository.save(url);
-
-    return url.getLongUrl();
+        return url;
     }
 
     private static void validateLongUrl(String longUrl) {
